@@ -1,97 +1,128 @@
-# BackCut Documentation Set for Claude Code
+# BackCut
 
-このドキュメント群は **Claude Code に効率的に読み込ませる** ことを目的に設計されています。
+> ブラウザ完結型 背景透過＋画像編集アプリ
 
-## ドキュメント構成
+**BackCut** は、画像の背景透過から仕上げ（影合成、エッジ調整、リサイズ）までを **すべてブラウザ内で完結** できるWebアプリです。AIトークン消費もサーバー送信もなく、プライバシーを守りながら高速に動作します。
 
-```
-backcut/                            # プロジェクトルート
-├── CLAUDE.md                       # ★ Claude Code が自動読込（リーン構成）
-└── docs/
-    ├── 01_requirements.md          # 要件定義（必要時に参照）
-    ├── 02_implementation-plan.md   # 実装計画・タスクリスト
-    ├── 03_bg-removal.md            # 背景透過処理の詳細
-    ├── 04_canvas-editing.md        # Canvas編集処理の詳細
-    ├── 05_shadow-and-presets.md    # 影とプリセット設計
-    ├── 06_deploy-and-security.md   # Vercel & セキュリティ
-    ├── 07_glossary.md              # ドメイン用語集
-    └── 08_license.md               # AGPL-3.0 ライセンス対応
-```
-
-別途、`README-template.md` がプロジェクトの README として配置するためのテンプレートです。
+🔗 **Live Demo**: https://<your-vercel-url>.vercel.app（デプロイ後に更新）
 
 ---
 
-## 設計の考え方（Progressive Disclosure）
+## 特徴
 
-Claude Code のベストプラクティスに従い、以下の構成にしています：
-
-- **`CLAUDE.md`** は **リーン**（200行未満）に保つ
-  - プロジェクト全体の地図、最重要ルール、コマンド、ポインタのみ
-  - Claude Code が全セッションで自動読込
-- **詳細ドキュメント** は `docs/` 配下に分割
-  - `CLAUDE.md` から `@docs/XX.md` でポインタ参照
-  - 必要なときだけ Claude がオンデマンドで読みに行く
-
-これにより、コンテキストウィンドウを浪費せず、作業フェーズに応じて適切な詳細情報だけが読み込まれます。
+- 🛡️ **完全ローカル処理**: 画像データは外部に送信されません
+- ⚡ **オフライン動作**: 初回モデルDL後はネット接続不要
+- 🎨 **多機能エディタ**: 背景透過、レタッチ、トリミング、影、リサイズ
+- 📦 **一括処理**: 複数画像をまとめてZIP出力
+- 🆓 **無料・OSS**: AGPL-3.0 ライセンスで公開
 
 ---
 
-## 使い方
+## 主な機能
 
-### 1. ドキュメントを配置する
+| 機能 | 内容 |
+|---|---|
+| 背景透過 | ドラッグ＆ドロップで自動透過、複数画像の一括処理 |
+| レタッチ | 透過のやり直し（戻す・消す）をブラシで手動補正 |
+| トリミング | 自動（余白カット）と手動（範囲指定）の両対応 |
+| エッジ調整 | 境界の硬さ・ぼかしを調整 |
+| 背景合成 | 単色・グラデーション・画像背景 |
+| 影合成 | ドロップシャドウ、用途別プリセット（立ち絵・アイテム等） |
+| リサイズ | YouTube/X/Instagram など各種サイズプリセット |
+| 出力 | PNG / WebP（透過維持）/ JPEG（背景白塗り） |
 
-このドキュメント群をプロジェクトルートに配置します：
+---
+
+## 技術スタック
+
+- **フレームワーク**: Next.js 14 (App Router) + TypeScript
+- **スタイリング**: Tailwind CSS + shadcn/ui
+- **状態管理**: Zustand
+- **背景透過**: [@imgly/background-removal](https://github.com/imgly/background-removal-js)
+- **画像編集**: 標準 Canvas API
+- **デプロイ**: Vercel
+
+---
+
+## ローカル開発
+
+### 必要環境
+- Node.js 18 以降
+- npm
+
+### セットアップ
 
 ```bash
-# プロジェクト作成後
+# クローン
+git clone https://github.com/<your-username>/backcut.git
 cd backcut
-# CLAUDE.md をプロジェクトルートに配置
-# docs/ 配下を配置
+
+# 依存関係インストール
+npm install
+
+# 開発サーバー起動
+npm run dev
 ```
 
-### 2. Claude Code を起動する
+ブラウザで http://localhost:3000 を開く。
+
+### コマンド
 
 ```bash
-cd backcut
-claude
+npm run dev      # 開発サーバー
+npm run build    # 本番ビルド
+npm run start    # 本番サーバー起動
+npm run lint     # ESLint
 ```
-
-Claude Code は起動時に **`CLAUDE.md` を自動で読み込み** ます。
-
-### 3. 実装を依頼する
-
-たとえば以下のように依頼します：
-
-```
-Phase 0 を進めてください。
-```
-
-Claude は `CLAUDE.md` のポインタから `docs/02_implementation-plan.md` を読み、Phase 0 のタスクリストに沿って実装を進めます。
-
-```
-Phase 2 のレタッチ機能を実装してください。
-```
-
-この場合、Claude は実装計画書から `04_canvas-editing.md` のレタッチセクションをオンデマンドで読みに行きます。
 
 ---
 
-## ドキュメントのメンテナンス
+## デプロイ
 
-- 実装中に判明したルール・規約は **`CLAUDE.md` に追記**
-- ただし `CLAUDE.md` は200行を超えないように、長くなる詳細は `docs/` に分離する
-- 機能追加・変更時は `02_implementation-plan.md` のタスクリストも更新
-- 新しいライブラリ追加時は、必ず **3段階セキュリティチェック**（`06_deploy-and-security.md`）を実施
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/<your-username>/backcut)
 
 ---
 
-## 参考にしたベストプラクティス
+## プライバシー
 
-このドキュメント構成は、以下の Claude Code 公式・コミュニティのベストプラクティスに基づいています：
+BackCut は **画像データを一切外部に送信しません**。
 
-- `CLAUDE.md` はリーンに保つ（200行未満）
-- WHAT / WHY / HOW を明確化
-- Progressive Disclosure で詳細を分離
-- ポインタ参照で必要時のみ読み込む
-- プロジェクトの「最重要原則」を明示する
+- ❌ サーバーへの画像アップロードなし
+- ❌ クラウドへの保存なし
+- ❌ トラッキング・解析ツールなし
+- ✅ すべての処理はブラウザ内で完結
+- ✅ オフラインでも動作（初回モデルDL後）
+
+---
+
+## ライセンス
+
+本プロジェクトは **AGPL-3.0-or-later** のもとで公開されています。
+完全なライセンス文は [LICENSE](./LICENSE) を参照してください。
+
+### なぜ AGPL なのか
+
+本プロジェクトは [@imgly/background-removal](https://github.com/imgly/background-removal-js)（AGPL-3.0）に依存しているため、派生物として同等の AGPL ライセンスで公開されます。
+
+### あなたが BackCut を改変・派生する場合
+
+AGPL-3.0 に従い、以下が必要です：
+
+- ソースコードを公開する（GitHub Public リポジトリ等）
+- 派生物も AGPL-3.0-or-later で公開する
+- アプリのUIから「ソースコードへの到達手段」を提供する（フッターリンクなど）
+
+商用利用でクローズドソース化したい場合は、[IMG.LY](mailto:support@img.ly) にお問い合わせください。
+
+### 第三者ライセンス
+
+- `@imgly/background-removal` — AGPL-3.0 — IMG.LY GmbH
+- その他: `package.json` および `node_modules/` 内のライセンス情報を参照
+
+---
+
+## 謝辞
+
+- [IMG.LY](https://img.ly/) — `@imgly/background-removal` の提供
+- [shadcn/ui](https://ui.shadcn.com/) — UIコンポーネント
+- すべての OSS コントリビューター
