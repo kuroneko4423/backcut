@@ -13,6 +13,7 @@ export function RemoveBgTool() {
   const error = useEditorStore((s) => s.error);
   const processedCount = useEditorStore((s) => s.processed.size);
   const setProcessed = useEditorStore((s) => s.setProcessed);
+  const setPristine = useEditorStore((s) => s.setPristine);
   const setStatus = useEditorStore((s) => s.setStatus);
   const setProgress = useEditorStore((s) => s.setProgress);
   const setError = useEditorStore((s) => s.setError);
@@ -27,6 +28,7 @@ export function RemoveBgTool() {
         const blob = await processImage(files[i], (key, current, total) => {
           setProgress({ fileIndex: i, key, current, total });
         });
+        setPristine(i, blob);
         setProcessed(i, blob);
       }
       setStatus('done');
@@ -37,7 +39,7 @@ export function RemoveBgTool() {
       setStatus('error');
       setProgress(null);
     }
-  }, [files, setError, setProcessed, setProgress, setStatus]);
+  }, [files, setError, setPristine, setProcessed, setProgress, setStatus]);
 
   const allDone = processedCount === files.length && files.length > 0;
   const isProcessing = status === 'processing';
